@@ -69,13 +69,13 @@ with DAG(
     extract =  PythonOperator(
                 task_id="extract",
                 python_callable=_extract,
-                trigger_rule='none_failed_or_skipped'
+                trigger_rule='none_failed_min_one_success'
             )
 
     post =  PythonOperator(
                 task_id="post",
                 python_callable=_post,
-                trigger_rule='none_failed_or_skipped'
+                trigger_rule='none_failed_min_one_success'
             )
 
     [data_engineer, devops_engineer, ml_engineer] >> extract >> post
