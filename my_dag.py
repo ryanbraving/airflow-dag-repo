@@ -5,7 +5,7 @@ from airflow.operators.empty import EmptyOperator
 
 with DAG(
     dag_id='celery_kubernetes_demo',
-    schedule_interval='0 0 * * *',
+    schedule='0 0 * * *',
     start_date=datetime(2021, 1, 1),
     catchup=False,
     dagrun_timeout=timedelta(minutes=60),

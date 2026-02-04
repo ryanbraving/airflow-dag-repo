@@ -7,7 +7,7 @@ from airflow.operators.bash import BashOperator
 
 with DAG(
     'py_virtual_env_2', 
-    schedule_interval=None, 
+    schedule=None, 
     start_date=pendulum.datetime(2022, 10, 10, tz="UTC"), 
     catchup=False, tags=['pythonvirtualenv']) as dag:
 
