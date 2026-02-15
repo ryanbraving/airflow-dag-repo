@@ -43,7 +43,7 @@ def load(**context):
     logging.info("Loading data into Postgres")
     data = context['ti'].xcom_pull(task_ids='transform')
     
-    conn = BaseHook.get_connection('postgres_uri')
+    conn = BaseHook.get_connection('postgres_coin')
     engine = create_engine(f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}')
     Session = sessionmaker(bind=engine)
     session = Session()
