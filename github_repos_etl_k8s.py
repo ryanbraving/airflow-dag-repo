@@ -18,20 +18,6 @@ with DAG(
     tags=['github', 'etl', 'kubernetes'],
 ) as dag:
     
-    # Get credentials from Airflow connection at runtime
-    try:
-        conn = BaseHook.get_connection('postgres_connection')
-        db_config = {
-            'DB_HOST': conn.host,
-            'DB_PORT': str(conn.port),
-            'DB_NAME': conn.schema,
-            'DB_USER': conn.login,
-            'DB_PASSWORD': conn.password
-        }
-    except:
-        # Fallback if connection not found during parse
-        db_config = {}
-    
     extract_task = KubernetesPodOperator(
         task_id='extract_github_repos',
         name='github-extract-pod',
@@ -60,7 +46,6 @@ for page in range(1, 6):
 print(f"Extracted {len(repos)} repositories")
 EOF
         '''],
-        env_vars=db_config,
         get_logs=True,
         is_delete_operator_pod=True,
         do_xcom_push=False,
@@ -204,7 +189,10 @@ for repo in repos:
     })
 
 # Load to database
-db_url = f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
+import subprocess
+result = subprocess.run(['python3', '-c', 'from airflow.hooks.base import BaseHook; conn = BaseHook.get_connection("postgres_connection"); print(f"{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}")'], capture_output=True, text=True)
+db_creds = result.stdout.strip()
+db_url = f"postgresql://{db_creds}"
 engine = create_engine(db_url)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
@@ -238,7 +226,6 @@ finally:
     engine.dispose()
 EOF
         '''],
-        env_vars=db_config,
         get_logs=True,
         is_delete_operator_pod=False,
         retries=3,
