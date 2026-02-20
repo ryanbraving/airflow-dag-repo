@@ -240,7 +240,7 @@ EOF
         '''],
         env_vars=db_config,
         get_logs=True,
-        is_delete_operator_pod=True,
+        is_delete_operator_pod=False,
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
