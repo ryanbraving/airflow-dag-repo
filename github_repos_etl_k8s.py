@@ -189,7 +189,7 @@ for repo in repos:
     })
 
 # Load to database
-db_url = "postgresql://postgres:postgres@postgres.airflow.svc.cluster.local:5432/postgres"
+db_url = "postgresql://u60tmrlb8se7ko:p684b8d8198f064d460cf61a97a8f04c459b4b67484d00c49eacc058cb47a38ef@cet8gijgk7sjl9.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d8q3pgagrssglj"
 engine = create_engine(db_url)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
