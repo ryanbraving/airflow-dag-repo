@@ -55,6 +55,7 @@ Base = declarative_base()
 
 class GitHubRepo(Base):
     __tablename__ = "github_repos"
+    __table_args__ = {'schema': 'github'}
     
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
@@ -75,6 +76,7 @@ class GitHubRepo(Base):
 
 class ETLCheckpoint(Base):
     __tablename__ = "etl_checkpoints"
+    __table_args__ = {'schema': 'github'}
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     dag_id = Column(String(255))
