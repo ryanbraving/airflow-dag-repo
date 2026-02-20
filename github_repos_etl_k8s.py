@@ -189,10 +189,7 @@ for repo in repos:
     })
 
 # Load to database
-import subprocess
-result = subprocess.run(['python3', '-c', 'from airflow.hooks.base import BaseHook; conn = BaseHook.get_connection("postgres_connection"); print(f"{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}")'], capture_output=True, text=True)
-db_creds = result.stdout.strip()
-db_url = f"postgresql://{db_creds}"
+db_url = "postgresql://postgres:postgres@postgres.airflow.svc.cluster.local:5432/postgres"
 engine = create_engine(db_url)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
