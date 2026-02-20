@@ -10,6 +10,17 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 from airflow.hooks.base import BaseHook
 from kubernetes.client import models as k8s
 
+def get_db_env_vars():
+    """Get database connection as environment variables"""
+    conn = BaseHook.get_connection('postgres_connection')
+    return [
+        k8s.V1EnvVar(name='DB_HOST', value=conn.host),
+        k8s.V1EnvVar(name='DB_PORT', value=str(conn.port)),
+        k8s.V1EnvVar(name='DB_NAME', value=conn.schema),
+        k8s.V1EnvVar(name='DB_USER', value=conn.login),
+        k8s.V1EnvVar(name='DB_PASSWORD', value=conn.password),
+    ]
+
 with DAG(
     dag_id='github_repos_etl_k8s',
     schedule='0 */6 * * *',
@@ -117,6 +128,7 @@ EOF
         name='github-load-pod',
         namespace='airflow',
         image='python:3.12-slim',
+        env_vars=get_db_env_vars(),
         cmds=['bash', '-c'],
         arguments=['''
             pip install requests sqlalchemy psycopg2-binary && python3 << 'EOF'
@@ -189,7 +201,7 @@ for repo in repos:
     })
 
 # Load to database
-db_url = "postgresql://u60tmrlb8se7ko:p684b8d8198f064d460cf61a97a8f04c459b4b67484d00c49eacc058cb47a38ef@cet8gijgk7sjl9.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d8q3pgagrssglj"
+db_url = f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
 engine = create_engine(db_url)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
