@@ -18,6 +18,19 @@ with DAG(
     tags=['github', 'etl', 'kubernetes'],
 ) as dag:
     
+    # Get DB credentials from Airflow connection
+    try:
+        conn = BaseHook.get_connection('postgres_connection')
+        db_env = {
+            'DB_USER': conn.login,
+            'DB_PASSWORD': conn.password,
+            'DB_HOST': conn.host,
+            'DB_PORT': str(conn.port),
+            'DB_NAME': conn.schema
+        }
+    except:
+        db_env = {}
+    
     extract_task = KubernetesPodOperator(
         task_id='extract_github_repos',
         name='github-extract-pod',
@@ -189,7 +202,7 @@ for repo in repos:
     })
 
 # Load to database
-db_url = "postgresql://u60tmrlb8se7ko:p684b8d8198f064d460cf61a97a8f04c459b4b67484d00c49eacc058cb47a38ef@cet8gijgk7sjl9.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d8q3pgagrssglj"
+db_url = f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
 engine = create_engine(db_url)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
@@ -223,6 +236,7 @@ finally:
     engine.dispose()
 EOF
         '''],
+        env_vars=db_env,
         get_logs=True,
         is_delete_operator_pod=False,
         retries=0,
