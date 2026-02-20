@@ -228,7 +228,7 @@ EOF
         '''],
         get_logs=True,
         is_delete_operator_pod=False,
-        retries=1,
+        retries=0,
         retry_delay=timedelta(minutes=3),
     )
     
