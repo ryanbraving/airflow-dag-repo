@@ -13,6 +13,7 @@ Base = declarative_base()
 
 class CryptoPrice(Base):
     __tablename__ = 'crypto_prices'
+    __table_args__ = {'schema': 'coin'}
     id = Column(String, primary_key=True)
     symbol = Column(String)
     price = Column(Float)
@@ -49,6 +50,9 @@ def load(**context):
     
     conn = BaseHook.get_connection('postgres_connection')
     engine = create_engine(f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}')
+    
+    Base.metadata.create_all(engine)
+    
     Session = sessionmaker(bind=engine)
     session = Session()
     
