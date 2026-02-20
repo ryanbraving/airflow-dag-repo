@@ -75,7 +75,7 @@ EOF
         image='python:3.12-slim',
         cmds=['bash', '-c'],
         arguments=['''
-            python3 << 'EOF'
+            pip install requests && python3 << 'EOF'
 import requests
 import json
 from datetime import datetime
@@ -121,7 +121,7 @@ print(f"Transformed {len(transformed)} repositories")
 EOF
         '''],
         get_logs=True,
-        is_delete_operator_pod=True,
+        is_delete_operator_pod=False,
         do_xcom_push=False,
         retries=2,
         retry_delay=timedelta(minutes=1),
