@@ -174,13 +174,9 @@ def load_to_postgres(**context):
     repos = data.get("transformed_repos", [])
     checkpoint_data = data.get("checkpoint", {})
     
-    # Get connection from Airflow or use default
-    try:
-        conn = BaseHook.get_connection('postgres_github')
-        db_url = f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}'
-    except:
-        logging.warning("Connection 'postgres_github' not found, using default")
-        db_url = "postgresql://postgres:postgres@postgres/github"
+    # Get connection from Airflow
+    conn = BaseHook.get_connection('postgres_connection')
+    db_url = f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}'
     
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
